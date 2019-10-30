@@ -7,38 +7,16 @@ import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Grocery {
-
-    public static class StockItem {
-
-        String product;
-        String unit;
-        int costInPence;
-
-        StockItem(String productIn, String unitIn, int costInPenceIn) {
-            this.product = productIn;
-            this.unit = unitIn;
-            this.costInPence = costInPenceIn;
-        }
-    }
-
-    public static class BasketEntry {
-        StockItem stockItem;
-        int quantity;
-
-        BasketEntry(StockItem stockItemIn, int quantityIn) {
-            this.stockItem = stockItemIn;
-            this.quantity = quantityIn;
-        }
-    }
 
     private List<StockItem> stockItems = new ArrayList<>();
 
     //a list of functions that calculate a discount in pence based on a list of basket entries
-    private List<Function<List<BasketEntry>, Integer>> discounts = new ArrayList<>();
+    private List<BiFunction<List<BasketEntry>, LocalDate, Integer>> discounts = new ArrayList<>();
 
     private void defaultStockAndDiscounts() {
         stockItems.add(new StockItem("soup", "tin", 65));
@@ -53,21 +31,38 @@ public class Grocery {
         final LocalDate endOfFollowingMonthAfterThreeDaysHence = threeDaysHence.plusMonths(2).withDayOfMonth(0).minusDays(1);
         System.out.println("yesterday = " + yesterday);
 
-        Function<List<BasketEntry>, Integer> buy2TinsOfSoupGetHalfPriceLoaf = (basket) -> {
-            //TODO
-            return 0;
+        BiFunction<List<BasketEntry>, LocalDate, Integer> buy2TinsOfSoupGetHalfPriceLoaf = (basket, pricingDate) -> {
+            if (pricingDate.isBefore(yesterday)) {
+                return 0;
+            }
+            long soupTinCount = basket.stream().filter(entry -> entry.stockItem.product.equals("soup")).map(entry -> new Integer(entry.quantity))
+                    .mapToInt(i -> i).sum();
+            Optional<BasketEntry> loafItem = basket.stream().filter(entry -> entry.stockItem.product.equals("loaf")).findFirst();
+            if (soupTinCount >= 2 && loafItem.isPresent()) {
+                return loafItem.get().stockItem.costInPence / 2;
+            } else {
+                return 0;
+            }
         };
 
-        Function<List<BasketEntry>, Integer> applel0PercentDiscount = (basket) -> {
-            //TODO
-            return 0;
+        BiFunction<List<BasketEntry>, LocalDate, Integer> applel0PercentDiscount = (basket, pricingDate) -> {
+            if (pricingDate.isBefore(threeDaysHence) || pricingDate.isAfter(endOfFollowingMonthAfterThreeDaysHence)) {
+                return 0;
+            }
+            List<BasketEntry> appleEntries = basket.stream().filter(entry -> entry.stockItem.product.equals("apple")).collect(Collectors.toList());
+            if (appleEntries.size() > 0) {
+                long appleCount = appleEntries.stream().map(entry -> entry.quantity).mapToInt(i -> i).sum();
+                return (int) ((appleCount * appleEntries.get(0).stockItem.costInPence) * 0.1);
+            } else {
+                return 0;
+            }
         };
-
+        discounts.add(buy2TinsOfSoupGetHalfPriceLoaf);
+        discounts.add(applel0PercentDiscount);
 
     }
 
-
-    public void process() throws IOException {
+    public void price(LocalDate pricingDate) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(new BufferedInputStream(System.in)));
         String line;
         for (; null != (line = br.readLine()); ) {
