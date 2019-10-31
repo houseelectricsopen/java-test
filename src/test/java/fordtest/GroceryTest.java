@@ -4,9 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.function.Consumer;
 
@@ -15,7 +13,74 @@ import org.junit.Test;
 
 public class GroceryTest {
 
+    @Test
+    public void test1() throws IOException {
+        int price = testPriceBasket(
+                inputPrintStream -> {
+                    inputPrintStream.println("add soup");
+                    inputPrintStream.println("add soup");
+                    inputPrintStream.println("add soup");
+                    inputPrintStream.println("add bread");
+                    inputPrintStream.println("add bread");
+                    inputPrintStream.println("price " + LocalDate.now());
+                }
+        );
+        Assert.assertEquals(315, price);
+    }
 
+    @Test
+    public void test2() throws IOException {
+        int price = testPriceBasket(
+                inputPrintStream -> {
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add milk");
+                    inputPrintStream.println("price " + LocalDate.now());
+                }
+        );
+        Assert.assertEquals(190, price);
+    }
+
+    @Test
+    public void test3() throws IOException {
+        int price = testPriceBasket(
+                inputPrintStream -> {
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add milk");
+                    inputPrintStream.println("price " + LocalDate.now().plusDays(5));
+                }
+        );
+        Assert.assertEquals(184, price);
+    }
+
+
+    @Test
+    public void test4() throws IOException {
+        int price = testPriceBasket(
+                inputPrintStream -> {
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add apple");
+                    inputPrintStream.println("add soup");
+                    inputPrintStream.println("add soup");
+                    inputPrintStream.println("add bread");
+                    inputPrintStream.println("price " + LocalDate.now().plusDays(5));
+                }
+        );
+        Assert.assertEquals(197, price);
+    }
+
+
+    private Grocery target = new Grocery();
 
     private int testPriceBasket(Consumer<PrintStream> commandLineInputer) throws IOException {
         PrintStream initialOut = System.out;
@@ -26,30 +91,21 @@ public class GroceryTest {
         commandLineInputer.accept(inputPrintStream);
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(inputBufferStream.toByteArray());
+        //redirect system in
         System.setIn(inputStream);
         ByteArrayOutputStream outputBufferStream = new ByteArrayOutputStream();
         PrintStream outputPrintStream = new PrintStream(outputBufferStream);
+        //redirect system out
         System.setOut(outputPrintStream);
         inputPrintStream.flush();
+
+        target.priceFromSystemIn();
+
+        //restore system in and out
         System.setOut(initialOut);
         System.setIn(initialIn);
-        return Integer.valueOf(new String(outputBufferStream.toByteArray()));
+        String strPrice = new String(outputBufferStream.toByteArray()).trim();
+        return Integer.valueOf(strPrice);
     }
-
-    @Test
-    public void test1() throws IOException {
-        int price = testPriceBasket(
-                inputPrintStream -> {
-                    inputPrintStream.println("add soup");
-                    inputPrintStream.println("add soup");
-                    inputPrintStream.println("add soup");
-                    inputPrintStream.println("add loaf");
-                    inputPrintStream.println("add loaf");
-                    inputPrintStream.println("price " + LocalDate.now());
-                }
-        );
-        Assert.assertEquals(price, 315);
-    }
-
 
 }
