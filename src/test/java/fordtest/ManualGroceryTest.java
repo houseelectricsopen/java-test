@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public class ManualGroceryTest {
     /**
-     * manual test
+     * manual test - to check non redirected console works
      */
     public static void main(String args[]) {
         System.out.println("example:");

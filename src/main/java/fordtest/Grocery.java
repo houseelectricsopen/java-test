@@ -30,7 +30,7 @@ public class Grocery {
         defaultStockAndDiscounts();
     }
 
-    public void priceFromSystemIn() throws IOException {
+    public void priceFromSystemIn() throws IOException, InvalidProductException {
         BufferedReader br = new BufferedReader(new InputStreamReader(new BufferedInputStream(System.in)));
         String line;
         List<BasketEntry> currentBasket = new ArrayList<>();
@@ -39,8 +39,7 @@ public class Grocery {
             if (line.startsWith("add")) {
                 String productName = line.replace("add", "").trim();
                 if (!productName2stockItem.containsKey(productName)) {
-                    System.out.println("Error: unknown product " + productName);
-                    return;
+                    throw new InvalidProductException(productName);
                 }
                 // basket entries with quentity >1 not dealt with
                 currentBasket.add(new BasketEntry(productName2stockItem.get(productName), 1));
