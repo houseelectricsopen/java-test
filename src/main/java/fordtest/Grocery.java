@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * All prices are in pence
  *
  * TODO: process quantities of BasketEntry, currently only quantity==1 is used
- * 
+ *
  */
 public class Grocery {
 
