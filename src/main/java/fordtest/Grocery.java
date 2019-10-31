@@ -13,6 +13,17 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+/**
+ * Assumptions:
+ * Its assumed that "command prompt" means System.in and System.out
+ *
+ * Basket items are added with "add <productName>"
+ * Baskets are priced with  "price <pricingDate>"
+ * All prices are in pence
+ *
+ * TODO: process quantities of BasketEntry, currently only quantity==1 is used
+ * 
+ */
 public class Grocery {
 
     public Grocery() {
