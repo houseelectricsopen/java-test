@@ -31,7 +31,7 @@ public class Grocery {
     }
 
     public void priceFromSystemIn() throws IOException, InvalidProductException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(new BufferedInputStream(System.in)));
+        final BufferedReader br = new BufferedReader(new InputStreamReader(new BufferedInputStream(System.in)));
         String line;
         List<BasketEntry> currentBasket = new ArrayList<>();
         for (; null != (line = br.readLine()); ) {
@@ -72,12 +72,12 @@ public class Grocery {
         final LocalDate threeDaysHence = today.plusDays(3);
         final LocalDate endOfFollowingMonthAfterThreeDaysHence = threeDaysHence.plusMonths(2).withDayOfMonth(1).minusDays(1);
 
-        BiFunction<List<BasketEntry>, LocalDate, Integer> buy2TinsOfSoupGetHalfPriceLoaf = (basket, pricingDate) -> {
+        final BiFunction<List<BasketEntry>, LocalDate, Integer> buy2TinsOfSoupGetHalfPriceLoaf = (basket, pricingDate) -> {
             if (pricingDate.isBefore(yesterday)) {
                 return 0;
             }
             long soupTinCount = basket.stream().filter(entry -> entry.stockItem.product.equals("soup")).map(entry -> new Integer(entry.quantity))
-                    .mapToInt(i -> i).sum();
+                    .mapToInt(Integer::intValue).sum();
             Optional<BasketEntry> loafItem = basket.stream().filter(entry -> entry.stockItem.product.equals("bread")).findFirst();
             if (soupTinCount >= 2 && loafItem.isPresent()) {
                 return loafItem.get().stockItem.costInPence / 2;
@@ -86,13 +86,13 @@ public class Grocery {
             }
         };
 
-        BiFunction<List<BasketEntry>, LocalDate, Integer> applel0PercentDiscount = (basket, pricingDate) -> {
+        final BiFunction<List<BasketEntry>, LocalDate, Integer> applel0PercentDiscount = (basket, pricingDate) -> {
             if (pricingDate.isBefore(threeDaysHence) || pricingDate.isAfter(endOfFollowingMonthAfterThreeDaysHence)) {
                 return 0;
             }
             List<BasketEntry> appleEntries = basket.stream().filter(entry -> entry.stockItem.product.equals("apple")).collect(Collectors.toList());
             if (appleEntries.size() > 0) {
-                long appleCount = appleEntries.stream().map(entry -> entry.quantity).mapToInt(i -> i).sum();
+                long appleCount = appleEntries.stream().map(entry -> entry.quantity).mapToInt(Integer::intValue).sum();
                 return (int) ((appleCount * appleEntries.get(0).stockItem.costInPence) * 0.1);
             } else {
                 return 0;
@@ -105,7 +105,7 @@ public class Grocery {
 
     private int price(List<BasketEntry> currentBasket, LocalDate pricingDate) {
         long rawPrice = currentBasket.stream().map(entry -> entry.quantity * entry.stockItem.costInPence).mapToLong(i -> i).sum();
-        long discount = discounts.stream().map(d -> d.apply(currentBasket, pricingDate)).mapToLong(i -> i).sum();
+        long discount = discounts.stream().map(d -> d.apply(currentBasket, pricingDate)).mapToLong(Integer::intValue).sum();
         return (int) (rawPrice - discount);
     }
 
