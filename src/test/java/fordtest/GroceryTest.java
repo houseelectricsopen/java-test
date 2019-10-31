@@ -14,7 +14,7 @@ import org.junit.Test;
 public class GroceryTest {
 
     @Test
-    public void test1() throws IOException {
+    public void test1() throws IOException, InvalidProductException {
         int price = testPriceBasket(
                 inputPrintStream -> {
                     inputPrintStream.println("add soup");
@@ -29,7 +29,7 @@ public class GroceryTest {
     }
 
     @Test
-    public void test2() throws IOException {
+    public void test2() throws IOException, InvalidProductException {
         int price = testPriceBasket(
                 inputPrintStream -> {
                     inputPrintStream.println("add apple");
@@ -46,7 +46,7 @@ public class GroceryTest {
     }
 
     @Test
-    public void test3() throws IOException {
+    public void test3() throws IOException, InvalidProductException {
         int price = testPriceBasket(
                 inputPrintStream -> {
                     inputPrintStream.println("add apple");
@@ -64,7 +64,7 @@ public class GroceryTest {
 
 
     @Test
-    public void test4() throws IOException {
+    public void test4() throws IOException, InvalidProductException {
         int price = testPriceBasket(
                 inputPrintStream -> {
                     inputPrintStream.println("add apple");
@@ -79,10 +79,20 @@ public class GroceryTest {
         Assert.assertEquals(197, price);
     }
 
+    @Test(expected=InvalidProductException.class)
+    public void testInvalidProduct() throws IOException, InvalidProductException {
+        testPriceBasket(
+                inputPrintStream -> {
+                    inputPrintStream.println("add tea");
+                    inputPrintStream.println("price " + LocalDate.now().plusDays(5));
+                }
+        );
+    }
+
 
     private Grocery target = new Grocery();
 
-    private int testPriceBasket(Consumer<PrintStream> commandLineInputer) throws IOException {
+    private int testPriceBasket(Consumer<PrintStream> commandLineInputer) throws IOException, InvalidProductException {
         PrintStream initialOut = System.out;
         InputStream initialIn = System.in;
         ByteArrayOutputStream inputBufferStream = new ByteArrayOutputStream();
